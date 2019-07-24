@@ -47,7 +47,7 @@ resource "vsphere_virtual_machine" "Swarm-Workers" {
         ipv4_address = "${var.work_ip_range}${count.index}"
         ipv4_netmask = 24
       } 
-      ipv4_gateway = "192.168.8.100"
+      ipv4_gateway = "192.168.9.100"
       dns_server_list = [ "192.168.10.115" ]
       linux_options {
         host_name = "bennetdockworker-${count.index+1}"
@@ -61,7 +61,7 @@ resource "vsphere_virtual_machine" "Swarm-Workers" {
 #### This command joins a worker node to the Docker Swarm. the Swarm has already been initilized in the manager template so the join token is used from that command 
    provisioner "remote-exec" {
       inline = [
-        "docker swarm join --token example-worker-token:192.168.8.150:2377"
+        "docker swarm join --token example-worker-token:192.168.9.150:2377"
       ]
 
  }
@@ -116,7 +116,7 @@ resource "vsphere_virtual_machine" "Swarm-Manager" {
         ipv4_address = "${var.man_ip_range}${count.index+1}"
         ipv4_netmask = 24
       } 
-      ipv4_gateway = "192.168.8.100"
+      ipv4_gateway = "192.168.9.100"
       dns_server_list = [ "192.168.10.115" ]
       linux_options {
         host_name = "bennetdockmanager-${count.index+1}"
@@ -130,7 +130,7 @@ resource "vsphere_virtual_machine" "Swarm-Manager" {
 #### This command joins a manager node to the Docker Swarm. 
    provisioner "remote-exec" {
       inline = [
-        "docker swarm join --token example-manager-token:192.168.8.150:2377"
+        "docker swarm join --token example-manager-token:192.168.9.150:2377"
       ]
 
  }
@@ -174,7 +174,7 @@ resource "vsphere_virtual_machine" "Swarm-Manager-Master" {
   connection {
     user = "SSH-UserName"
     password = "SSH-Password"
-    host = "192.168.8.150"
+    host = "192.168.9.150"
   }   
 ####--------------------------------------------------------------------------------------------------
 #### Template ID  
@@ -184,10 +184,10 @@ resource "vsphere_virtual_machine" "Swarm-Manager-Master" {
 #### VMware Guest Customization (Only working on Ubuntu 16.04 7/1/19)
     customize {
       network_interface {
-        ipv4_address = "192.168.8.150"
+        ipv4_address = "192.168.9.150"
         ipv4_netmask = 24
       } 
-      ipv4_gateway = "192.168.8.100"
+      ipv4_gateway = "192.168.9.100"
       dns_server_list = [ "192.168.10.115" ]
       linux_options {
         host_name = "bennetdockmanager-master"
