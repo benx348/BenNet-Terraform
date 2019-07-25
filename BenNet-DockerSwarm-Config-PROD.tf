@@ -4,7 +4,7 @@
 
 #### Name of machine to be cloned
 resource "vsphere_virtual_machine" "Swarm-Workers" {
-  name             = "BenNetDockWorker-${count.index+1}"
+  name             = "${var.worker_vm_name}${count.index+1}"
   count            = "${var.worker_count}"
   resource_pool_id = "${data.vsphere_resource_pool.pool.id}"
   datastore_id     = "${data.vsphere_datastore.datastore.id}"
@@ -24,7 +24,7 @@ resource "vsphere_virtual_machine" "Swarm-Workers" {
 ####--------------------------------------------------------------------------------------------------
 #### Template Disk info
   disk {
-    name             = "BenNetDockWorker-${count.index+1}.vmdk"
+    name             = "${var.worker_vm_name}${count.index+1}.vmdk"
     size             = "${data.vsphere_virtual_machine.worker-template.disks.0.size}"
     eagerly_scrub    = "${data.vsphere_virtual_machine.worker-template.disks.0.eagerly_scrub}"
     thin_provisioned = "${data.vsphere_virtual_machine.worker-template.disks.0.thin_provisioned}"
@@ -32,8 +32,8 @@ resource "vsphere_virtual_machine" "Swarm-Workers" {
 ####--------------------------------------------------------------------------------------------------
 #### SSH Creds to the machine
   connection {
-        user = "SSH-UserName"
-        password = "SSH-Password"
+        user = "${var.ssh-user}"
+        password = "${var.ssh-password}"
         host = "${var.work_ip_range}${count.index}"
     }
 ####-------------------------------------------------------------------------------------------------- 
@@ -45,13 +45,13 @@ resource "vsphere_virtual_machine" "Swarm-Workers" {
     customize {
       network_interface {
         ipv4_address = "${var.work_ip_range}${count.index}"
-        ipv4_netmask = 24
+        ipv4_netmask = "${var.ipv4_netmask}"
       } 
-      ipv4_gateway = "192.168.9.100"
-      dns_server_list = [ "192.168.10.115" ]
+      ipv4_gateway = "${var.default_gateway}"
+      dns_server_list = [ "${var.dns_server}" ]
       linux_options {
-        host_name = "bennetdockworker-${count.index+1}"
-        domain    = "bennettest.com"
+        host_name = "${var.worker_host_name}${count.index+1}"
+        domain    = "${var.domain}"
         
       }
     }
@@ -61,7 +61,7 @@ resource "vsphere_virtual_machine" "Swarm-Workers" {
 #### This command joins a worker node to the Docker Swarm. the Swarm has already been initilized in the manager template so the join token is used from that command 
    provisioner "remote-exec" {
       inline = [
-        "docker swarm join --token example-worker-token:192.168.9.150:2377"
+        "docker swarm join --token ${var.worker_join_token} ${var.master_manager_ip_address}:2377"
       ]
 
  }
@@ -73,7 +73,7 @@ resource "vsphere_virtual_machine" "Swarm-Workers" {
 
 #### Name of machine to be cloned
 resource "vsphere_virtual_machine" "Swarm-Manager" {
-  name             = "BenNetDockManager-${count.index+1}"
+  name             = "${var.manager_vm_name}${count.index+1}"
   count            = "${var.manager_count}"
   resource_pool_id = "${data.vsphere_resource_pool.pool.id}"
   datastore_id     = "${data.vsphere_datastore.datastore.id}"
@@ -93,7 +93,7 @@ resource "vsphere_virtual_machine" "Swarm-Manager" {
 ####--------------------------------------------------------------------------------------------------
 #### Template Disk info
   disk {
-    name             = "BenNetDockManager-${count.index+1}.vmdk"
+    name             = "${var.manager_vm_name}${count.index+1}.vmdk"
     size             = "${data.vsphere_virtual_machine.worker-template.disks.0.size}"
     eagerly_scrub    = "${data.vsphere_virtual_machine.worker-template.disks.0.eagerly_scrub}"
     thin_provisioned = "${data.vsphere_virtual_machine.worker-template.disks.0.thin_provisioned}"
@@ -101,8 +101,8 @@ resource "vsphere_virtual_machine" "Swarm-Manager" {
 ####--------------------------------------------------------------------------------------------------
 #### SSH Creds to the machine
   connection {
-        user = "SSH-UserName"
-        password = "SSH-Password"
+        user = "${var.ssh-user}"
+        password = "${var.ssh-password}"
         host = "${var.man_ip_range}${count.index+1}"
     }
 ####-------------------------------------------------------------------------------------------------- 
@@ -114,13 +114,13 @@ resource "vsphere_virtual_machine" "Swarm-Manager" {
     customize {
       network_interface {
         ipv4_address = "${var.man_ip_range}${count.index+1}"
-        ipv4_netmask = 24
+        ipv4_netmask = "${var.ipv4_netmask}"
       } 
-      ipv4_gateway = "192.168.9.100"
-      dns_server_list = [ "192.168.10.115" ]
+      ipv4_gateway = "${var.default_gateway}"
+      dns_server_list = [ "${var.dns_server}" ]
       linux_options {
-        host_name = "bennetdockmanager-${count.index+1}"
-        domain    = "bennettest.com"
+        host_name = "${var.manager_host_name}${count.index+1}"
+        domain    = "${var.domain}"
         
       }
     }
@@ -130,7 +130,7 @@ resource "vsphere_virtual_machine" "Swarm-Manager" {
 #### This command joins a manager node to the Docker Swarm. 
    provisioner "remote-exec" {
       inline = [
-        "docker swarm join --token example-manager-token:192.168.9.150:2377"
+        "docker swarm join --token ${var.manager_join_token} ${var.master_manager_ip_address}:2377"
       ]
 
  }
@@ -144,7 +144,7 @@ resource "vsphere_virtual_machine" "Swarm-Manager" {
 
 #### Name of machine to be cloned
 resource "vsphere_virtual_machine" "Swarm-Manager-Master" {
-  name             = "BenNetDockManager-Master"
+  name             = "${var.master_manager_vm_name}"
   resource_pool_id = "${data.vsphere_resource_pool.pool.id}"
   datastore_id     = "${data.vsphere_datastore.datastore.id}"
 ####--------------------------------------------------------------------------------------------------
@@ -163,7 +163,7 @@ resource "vsphere_virtual_machine" "Swarm-Manager-Master" {
 ####--------------------------------------------------------------------------------------------------
 #### Template Disk info
   disk {
-    name             = "BenNetDockManager-Master.vmdk"
+    name             = "${var.master_manager_vm_name}.vmdk"
     size             = "${data.vsphere_virtual_machine.master-management-template.disks.0.size}"
     eagerly_scrub    = "${data.vsphere_virtual_machine.master-management-template.disks.0.eagerly_scrub}"
     thin_provisioned = "${data.vsphere_virtual_machine.master-management-template.disks.0.thin_provisioned}"
@@ -172,9 +172,9 @@ resource "vsphere_virtual_machine" "Swarm-Manager-Master" {
 ####--------------------------------------------------------------------------------------------------
 #### SSH Creds to the machine
   connection {
-    user = "SSH-UserName"
-    password = "SSH-Password"
-    host = "192.168.9.150"
+        user = "${var.ssh-user}"
+        password = "${var.ssh-password}"
+        host = "${var.master_manager_ip_address}"
   }   
 ####--------------------------------------------------------------------------------------------------
 #### Template ID  
@@ -184,14 +184,14 @@ resource "vsphere_virtual_machine" "Swarm-Manager-Master" {
 #### VMware Guest Customization (Only working on Ubuntu 16.04 7/1/19)
     customize {
       network_interface {
-        ipv4_address = "192.168.9.150"
-        ipv4_netmask = 24
+        ipv4_address = "${var.master_manager_ip_address}"
+        ipv4_netmask = "${var.ipv4_netmask}"
       } 
-      ipv4_gateway = "192.168.9.100"
-      dns_server_list = [ "192.168.10.115" ]
+      ipv4_gateway = "${var.default_gateway}"
+      dns_server_list = [ "${var.dns_server}" ]
       linux_options {
-        host_name = "bennetdockmanager-master"
-        domain    = "bennettest.com"
+        host_name = "${var.master_manager_host_name}"
+        domain    = "${var.domain}"
         
       }
     }
@@ -202,12 +202,12 @@ resource "vsphere_virtual_machine" "Swarm-Manager-Master" {
 #### This step git clones the repo containing the docker compose files that are subseqitly deployed via a stack deploy command for each type of stack
     provisioner "remote-exec" {
       inline = [
-        "git clone https://github.com/exaplerepo.git"
-        ,"docker stack deploy --compose-file=/home/administrator/BenNetDock-Stack/Portainer-Stack-DEV.yml Portainer-Stack-DEV"
-        ,"docker stack deploy --compose-file=/home/administrator/BenNetDock-Stack/Tor-Stack-DEV.yml Tor-Stack-DEV"
-        ,"docker stack deploy --compose-file=/home/administrator/BenNetDock-Stack/Guac-Stack-DEV.yml Guac-Stack-DEV"
-        ,"docker stack deploy --compose-file=/home/administrator/BenNetDock-Stack/Unifi-Stack-DEV.yml Unifi-Stack-DEV"
-        ,"docker stack deploy --compose-file=/home/administrator/BenNetDock-Stack/Plex-Stack-DEV.yml Plex-Stack-DEV"
+        "git clone --branch PROD https://Example-Git-Repo.git"
+        ,"docker stack deploy --compose-file=/home/administrator/BenNet-DockSwarm-StackDeploy/Portainer-Stack-PROD.yml Portainer-Stack-PROD"
+        ,"docker stack deploy --compose-file=/home/administrator/BenNet-DockSwarm-StackDeploy/Tor-Stack-PROD.yml Tor-Stack-PROD"
+        ,"docker stack deploy --compose-file=/home/administrator/BenNet-DockSwarm-StackDeploy/Guac-Stack-PROD.yml Guac-Stack-PROD"
+        ,"docker stack deploy --compose-file=/home/administrator/BenNet-DockSwarm-StackDeploy/Unifi-Stack-PROD.yml Unifi-Stack-PROD"
+        ,"docker stack deploy --compose-file=/home/administrator/BenNet-DockSwarm-StackDeploy/Plex-Stack-PROD.yml Plex-Stack-PROD"
       ]
     }
 
