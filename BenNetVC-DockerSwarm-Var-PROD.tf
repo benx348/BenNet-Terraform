@@ -41,7 +41,7 @@ data "vsphere_virtual_machine" "master-management-template" {
 }
 variable "master_manager_cpu" {default = 2}
 variable "master_manager_mem" {default = 2048}
-variable "master_manager_gateway" {default = "192.168.8.100"}
+variable "master_manager_gateway" {default = "192.168.9.100"}
 variable "master_manager_netmask" {default = "24"}
 ####################################################__________________________________________
 #### Docker Swarm Additional Manager Informtion ####
@@ -53,7 +53,7 @@ data "vsphere_virtual_machine" "management-template" {
 variable "manager_count" {default = 0} ### Number of Additional Docker Swarm Manager Machines ####
 variable "manager_cpu" {default = 2}
 variable "manager_mem" {default = 2048}
-variable "manager_gateway" {default = "192.168.8.100"}
+variable "manager_gateway" {default = "192.168.9.100"}
 variable "manager_netmask" {default = "24"}
 #########################################_____________________________________________________
 #### Docker Swarm Worker Information ####
@@ -65,10 +65,10 @@ variable "manager_netmask" {default = "24"}
 variable "worker_count" {default = 2} ### Number of Docker Swarm Worker Machines ####
 variable "worker_cpu" {default = 2}
 variable "worker_mem" {default = 2048}
-variable "worker_gateway" {default = "192.168.8.100"}
+variable "worker_gateway" {default = "192.168.9.100"}
 variable "worker_netmask" {default = "24"}
 ##########################____________________________________________________________________
 #### Networks IP Range ###
 ##########################
-variable "man_ip_range" {default = "192.168.8.15"} # manager IP range
-variable "work_ip_range" {default = "192.168.8.16"} # worker IP range
+variable "man_ip_range" {default = "192.168.9.15"} # manager IP range
+variable "work_ip_range" {default = "192.168.9.16"} # worker IP range
