@@ -24,7 +24,7 @@ data "vsphere_datastore" "datastore" {
   datacenter_id = "${data.vsphere_datacenter.dc.id}"
 }
 data "vsphere_resource_pool" "pool" {
-  name          = "Docker-Swarm-Test" ## VMware Resource Pool for Resources to reside in 
+  name          = "Docker-Swarm-DEV" ## VMware Resource Pool for Resources to reside in 
   datacenter_id = "${data.vsphere_datacenter.dc.id}"
 }
 data "vsphere_network" "network" {
